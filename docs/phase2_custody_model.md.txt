@@ -1,0 +1,22 @@
+# Phase 2 — Custody Model & Rules
+
+## Scenario
+Supply-chain custody for hardware delivery (factory → courier → data center).
+
+## Strict rules
+- **A: Any light exposure = compromised**
+- **B: Violation is one-way (tamper-evident)**
+
+## Roles
+- Admin/Sealer (factory)
+- Handler (courier)
+- Receiver (data center)
+
+## States
+UNINITIALIZED → SEALED_IDLE → IN_CUSTODY → TRANSFER_WINDOW → (VIOLATION_LOCK | RECEIVED_FINAL)
+
+## Custody violations
+- Motion in SEALED_IDLE (unauthorised handling)
+- Any light exposure after seal (seal breach)
+- Transfer window timeout
+- Excessive unknown RFID attempts

@@ -1,0 +1,35 @@
+# Wiring Notes (Phase 1)
+
+## Power rails
+- 5V rail powers: OLED, LDR divider 
+- 3.3V rail powers: MFRC522 RFID module, GY-87, LED (via GPIO)
+- All modules share common ground (GND)
+
+## OLED (I2C, 4-pin)
+- VCC → 5V
+- GND → GND
+- SDA → SDA
+- SCL → SCL
+
+## GY-87 (I2C)
+- VCC → 3.3V
+- GND → GND
+- SDA → SDA
+- SCL → SCL
+
+## MFRC522 (SPI)
+- VCC → 3.3V
+- GND → GND
+- SDA/SS → D10
+- SCK → D13
+- MOSI → D11
+- MISO → D12
+- RST → D9
+
+## LDR voltage divider (Seal breach / open detection)
+5V → LDR → (A0 node) → 10kΩ → GND
+- A0 reads the junction voltage
+
+## LED (RFID feedback in calibration)
+- D7 → 220Ω → LED anode (+)
+- LED cathode (–) → GND

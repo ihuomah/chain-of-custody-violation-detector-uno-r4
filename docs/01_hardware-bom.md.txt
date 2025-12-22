@@ -1,0 +1,16 @@
+# Hardware Bill of Materials (BOM)
+
+## Core (Phase 1)
+
+- Arduino Uno R4 WiFi
+- 0.96" OLED (I2C, 4-pin: VCC/GND/SDA/SCL)
+- MFRC522 RFID reader + RFID cards/tags
+- GY-87 IMU module
+- Photoresistor (LDR) + 10kΩ resistor (voltage divider)
+- LED + 220Ω resistor (status indicator)
+- Breadboard + jumper wires
+- Enclosure/box (for light exposure testing)
+
+## Notes
+- MFRC522 must be powered from **3.3V** (not 5V).
+- OLED and GY-87 run on the shared I2C bus (SDA/SCL).

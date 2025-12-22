@@ -1,0 +1,26 @@
+# Chain-of-Custody Violation Detection System (CoC-VDS)
+
+## Summary
+This project is a cyber-physical prototype built on the Arduino Uno R4 WiFi to detect and record **chain-of-custody violations** during supply-chain hardware delivery
+(Factory → Courier → Data Center).
+
+Unlike basic tamper detection, the system focuses on **custody rules**:
+
+- who is authorized to handle the package
+- when custody transfers are allowed
+- whether movement/opening occurred outside authorized custody windows
+
+## Current status
+- Phase 1 complete: Hardware bring-up + sensor calibration verified
+- Phase 2: Custody model and violation rules defined.
+This included identifying system roles, custody states, allowed transitions,
+and explicit violation conditions for a supply-chain delivery scenario
+(Factory → Courier → Data Center).
+- Phase 3: Custody state machine implementation
+
+
+## Core sensors
+- RFID (MFRC522): custodian identity
+- IMU (GY-87): handling/movement detection
+- LDR (photoresistor): seal breach/light exposure
+- OLED: on-device audit status display
