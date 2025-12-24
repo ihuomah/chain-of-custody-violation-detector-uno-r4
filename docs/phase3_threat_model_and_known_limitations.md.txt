@@ -1,0 +1,87 @@
+---
+
+## Threat Model & Known Limitations (Phase 3)
+
+Phase 3 is intentionally scoped to enforce **process integrity after custody initiation**.
+The following assumptions and limitations are explicit and deliberate.
+
+---
+
+### 1. Calibration Trust Assumption
+Sensor thresholds are automatically calibrated at boot based on the ambient environment.
+
+Assumption:
+- Calibration is performed by a trusted administrator
+- The enclosure is closed
+- The environment is reasonably controlled
+
+Limitation:
+- If calibration occurs in a bright or noisy environment, thresholds may be inflated
+- Elevated thresholds could reduce sensitivity to later violations
+
+This represents a **calibration trust boundary**, not a logic flaw.
+
+Mitigation:
+- Addressed in Phase 4 via explicit arming, calibration locking, sanity bounds, and audit logging.
+
+---
+
+### 2. Threshold Visibility & Side-Channel Leakage
+During Phase 3, live sensor readings and derived thresholds are displayed on the OLED for debugging and validation.
+
+Limitation:
+- Threshold values and real-time readings are observable
+- An attacker could infer enforcement sensitivity and adapt behavior
+
+This exposure is intentional in Phase 3 to:
+- validate calibration correctness
+- tune thresholds
+- observe system behavior
+
+Mitigation:
+- Phase 4 introduces stealth UI and restricted debug modes.
+
+---
+
+### 3. Pre-Seal Handling (No Custody Yet)
+Before the WHITE tag seals the asset, the system is in `UNINITIALIZED`.
+
+Limitation:
+- Movement or removal of the device before sealing does not trigger a violation
+- No chain-of-custody claim exists prior to sealing
+
+This mirrors real-world custody models:
+- Evidence and packages are not protected until formally sealed
+
+Mitigation:
+- Phase 4 introduces pre-seal anomaly tracking and seal-time consistency checks.
+
+---
+
+### 4. Insider or Bypass Scenarios
+Phase 3 treats RFID credentials as possession-based trust tokens.
+
+Limitation:
+- Card cloning, theft, or insider misuse is not detected
+- Identity assurance is out of scope for this phase
+
+Mitigation:
+- Phase 4 adds MFA, multi-party authorization, and forensic correlation.
+
+---
+
+### 5. Enforcement Without Attribution
+Phase 3 enforces rules and detects violations but does not persist custody history.
+
+Limitation:
+- Violations are detected in real time but not reconstructed after power loss
+
+Mitigation:
+- Phase 4 introduces append-only, tamper-evident logging.
+
+---
+
+### Summary
+Phase 3 establishes a correct and enforceable custody model **once custody begins**.
+
+Security hardening, stealth, and forensic attribution are intentionally deferred to Phase 4 to preserve clean separation of concerns.

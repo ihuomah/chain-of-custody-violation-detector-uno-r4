@@ -1,0 +1,188 @@
+# Phase 3 — State Machine Enforcement (Supply-Chain Mode)
+
+## Purpose
+Phase 3 implements a **finite state machine (FSM)** that enforces **chain-of-custody rules** for a sealed asset during transport.
+
+This phase answers three core questions:
+
+- Who is allowed to handle the asset?
+- When is movement permitted?
+- What events permanently invalidate custody integrity?
+
+> Phase 3 focuses strictly on **real-time enforcement and violation detection**.  
+> Persistent logging, stealth UI, and identity hardening would be introduced in Phase 4.
+
+---
+
+## Hardware & Signals Used
+Phase 3 relies on correlated **cyber-physical signals**:
+
+- **RFID (MFRC522)** — identity and custody transitions  
+- **IMU (MPU6050 / GY-87)** — motion and handling detection  
+- **LDR (Photoresistor)** — enclosure opening / seal breach detection  
+- **OLED (SSD1306)** — live status and state visibility  
+- **Serial Monitor** — event-driven logs and debugging output  
+
+All thresholds are automatically calibrated at boot based on the ambient enclosure environment.
+This calibration assumes a controlled sealing context and is treated as a trust boundary in Phase 3.
+
+
+---
+
+## Roles & Credentials
+
+### WHITE Tag — Admin / Sealer / Receiver
+- Seals the asset at origin
+- Receives the asset at destination
+- Closes the custody chain
+- **Not authorized to transport**
+
+### BLUE Tag — Handler / Courier
+- Takes custody for transport
+- May move the asset while sealed
+- **Not authorized to open the enclosure**
+
+RFID tags are treated as **token-based trust** in Phase 3.
+
+---
+
+## State Machine Overview
+
+### States
+- `UNINITIALIZED` — no custody chain started  
+- `SEALED_IDLE` — asset sealed, awaiting pickup  
+- `IN_CUSTODY` — handler has legal custody  
+- `TRANSFER_WINDOW` — controlled handover period  
+- `RECEIVED_FINAL` — custody chain closed  
+- `VIOLATION_LOCK` — integrity permanently compromised  
+
+---
+
+### Allowed Transitions
+
+| Current State                    |    Event                             |       Next State |
+|----------------------------------|--------------------------------------|------------------|
+| `UNINITIALIZED`                  | WHITE scan                           | `SEALED_IDLE`    |
+| `SEALED_IDLE`                    | BLUE scan                            | `IN_CUSTODY`     |
+| `IN_CUSTODY`                     | BLUE double-tap (≤ 3s)               | `TRANSFER_WINDOW`|
+| `TRANSFER_WINDOW`                | WHITE scan (≤ 60s)                   | `RECEIVED_FINAL` |
+| Any active state                 | Violation condition                  | `VIOLATION_LOCK` |
+
+Invalid scans or transitions are ignored and logged as informational events.
+
+---
+
+## Enforcement Rules (Violation Conditions)
+
+### 1. Light Exposure (Seal Breach)
+If light exceeds the calibrated threshold while the asset is sealed or in transit:
+
+- Trigger: `lightVal > LIGHT_THRESHOLD`
+- Result: `VIOLATION_LOCK`
+- Reason: `"Light exposure detected"`
+
+Applied in all states except:
+- `UNINITIALIZED`
+- `RECEIVED_FINAL`
+- `VIOLATION_LOCK`
+
+---
+
+### 2. Motion Without Custody
+If motion is detected **after sealing but before custody assignment**:
+
+- Trigger: `motionVal > MOTION_THRESHOLD` while in `SEALED_IDLE`
+- Result: `VIOLATION_LOCK`
+- Reason: `"Motion w/o custody"`
+
+This enforces the rule:
+> Sealing ≠ permission to handle.
+
+---
+
+### 3. Transfer Window Expiry
+If custody handover is initiated but not completed in time:
+
+- Trigger: no WHITE scan within `TRANSFER_WINDOW_MS`
+- Result: `VIOLATION_LOCK`
+- Reason: `"Transfer window expired"`
+
+This prevents undocumented or ambiguous custody transitions.
+
+---
+
+## Boot Calibration & Thresholding
+
+At startup, the system samples sensor values while the enclosure is **closed and stationary**.
+
+Calibration parameters:
+- 40 samples
+- 25 ms delay between samples
+
+Computed thresholds:
+- `LIGHT_THRESHOLD = light_avg + 80`
+- `MOTION_THRESHOLD = motion_avg + 4000`
+
+This adaptive approach reduces false positives caused by enclosure variance.
+
+---
+
+## Testing Procedure (Phase 3)
+
+### Physical Setup
+1. Place Arduino, IMU, and LDR **inside a box**
+2. Mount IMU firmly to avoid shifting
+3. Keep RFID reader **outside the box**
+4. Close and seal the enclosure
+
+---
+
+### Test Scenarios
+
+#### A. Seal Initialization
+- Scan WHITE
+- Expected: `SEALED_IDLE`
+
+#### B. Unauthorized Motion
+- Move enclosure before BLUE scan
+- Expected: `VIOLATION_LOCK`
+
+#### C. Custody Pickup
+- Scan WHITE → Scan BLUE
+- Expected: `IN_CUSTODY`
+
+#### D. Authorized Transport
+- Move enclosure in `IN_CUSTODY`
+- Expected: no violation
+
+#### E. Seal Breach
+- Open enclosure or expose to light
+- Expected: `VIOLATION_LOCK`
+
+#### F. Transfer Window Success
+- In `IN_CUSTODY`, scan BLUE twice within 3s
+- Enter `TRANSFER_WINDOW`
+- Scan WHITE within 60s
+- Expected: `RECEIVED_FINAL`
+
+#### G. Transfer Window Failure
+- Enter `TRANSFER_WINDOW`
+- Wait > 60s without WHITE scan
+- Expected: `VIOLATION_LOCK`
+
+---
+
+## Serial Output Behavior
+Serial output is **event-driven**, not continuous:
+
+- Boot + calibration logs
+- RFID UID detection
+- State transitions
+- Violation reports
+- Optional heartbeat (configurable)
+
+This mirrors production firmware behavior.
+
+
+
+
