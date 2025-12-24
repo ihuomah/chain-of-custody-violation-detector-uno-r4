@@ -69,7 +69,7 @@ It detects:
 Phase 3 deliberately focuses on **enforcement**, not attribution or stealth.
 
 Detailed Phase 3 documentation:  
- [`docs/phase3_state_machine_enforcement.md`](docs/phase3_state_machine_enforcement.md)
+ [`docs/phase3_state_machine_enforcement.md.txt`](docs/phase3_state_machine_enforcement.md.txt)
 
 ---
 
