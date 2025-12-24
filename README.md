@@ -43,6 +43,15 @@ Sensor thresholds are **auto-calibrated** at boot and treated as a trust boundar
   *Not authorized to open the enclosure.*
 
 ---
+## State Machine Overview
+![Chain-of-Custody State Machine](media/state_machine_phase3/state_machine_phase3.png)
+
+*Directed, fail-closed custody enforcement state machine.
+Black arrows represent authorized transitions.
+Red arrows represent violation triggers that permanently latch the system
+into `VIOLATION_LOCK`. Phase 4 hardening paths are explicitly marked.*
+
+---
 
 ## Project Phases
 
