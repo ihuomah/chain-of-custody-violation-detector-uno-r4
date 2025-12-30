@@ -1,4 +1,7 @@
 # Chain-of-Custody Violation Detection System (CoC-VDS)
+---
+> Security isn’t about being loud. It’s about being certain.
+---
 
 **CoC-VDS** is a **cyber-physical security prototype** designed for the **Arduino Uno R4 WiFi**. It is engineered to protect high-value assets during transport (e.g., Factory → Courier → Data Center) by **enforcing strict custody protocols**.
 
