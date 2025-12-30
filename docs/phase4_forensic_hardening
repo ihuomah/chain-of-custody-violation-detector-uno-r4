@@ -67,7 +67,7 @@ Phase 4 was validated against common custody attack classes, using dedicated dem
 **Reset based Evasion:** Power loss during active custody.
 
 Selected scenarios are demonstrated directly; others are documented and reproducible via provided 
-![demos](demos/) builds.
+[demos](demos/) builds.
 
 **Summary: Certainty Over Alerts**
 The design philosophy of Phase 4 is that **Security is not about being loud; it is about being certain.**

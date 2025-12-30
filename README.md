@@ -65,11 +65,11 @@ The repository includes specialized builds to test the system against sophistica
 ---
 
 **Repository Roadmap**
-![COC_VDS Final Build-Phase 4 Hardened](src/coc_vds_forensic-engine/) : The "Production" firmware including Stealth UI and Chaining.
+[COC_VDS Final Build-Phase 4 Hardened](src/coc_vds_forensic-engine/) : The "Production" firmware including Stealth UI and Chaining.
 
-![Adversarial Build](demos/) : Adversarial builds for bit-flip and reordering/delete tests.
+[Adversarial Build](demos/) : Adversarial builds for bit-flip and reordering/delete tests.
 
-![Technical Documentation](docs/) : Technical deep-dives into the state machine and crypto-implementation.
+[Technical Documentation](docs/) : Technical deep-dives into the state machine and crypto-implementation.
 
 ---
 
