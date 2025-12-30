@@ -1,3 +1,8 @@
+/* Sensor Caliberation
+*Baseline Setup for LDR and IMU
+*
+*/
+
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>

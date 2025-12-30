@@ -1,107 +1,88 @@
 # Chain-of-Custody Violation Detection System (CoC-VDS)
 
-A **cyber-physical security prototype** built on **Arduino Uno R4 WiFi** that enforces and detects **chain-of-custody violations** during high-value asset transport (e.g. factory → courier → data center).
+**CoC-VDS** is a **cyber-physical security prototype** designed for the **Arduino Uno R4 WiFi**. It is engineered to protect high-value assets during transport (e.g., Factory → Courier → Data Center) by **enforcing strict custody protocols**.
 
-Unlike basic *tamper detection*, this system models **custody states**, validates **authorized handovers**, and detects **process violations** such as unauthorized movement, seal breaches, and failed transfers.
-
----
-
-## Why This Matters
-In regulated environments (digital forensics, hardware supply chains, evidence handling), the key question is not:
-
-> *“Was the package opened?”*
-
-But rather:
-
-> *“Was the chain of custody preserved?”*
-
-An asset can remain physically intact yet still become **legally inadmissible** due to undocumented handling.  
-CoC-VDS is designed to detect exactly those failures.
+Most security systems ask: *“Was the box opened?”* **CoC-VDS** asks: **“Was the person holding the box authorized to open it at that exact time?”**
 
 ---
 
-## System Overview
-The system correlates **identity**, **motion**, and **enclosure state** to enforce custody rules in real time:
+**The Core Philosophy**
+In digital forensics and high-stakes hardware supply chains, an asset can remain physically intact but still be **legally compromised** if the chain of custody is broken.
 
-- **RFID (MFRC522)** — role-based identity (admin vs courier)
-- **IMU (MPU6050 / GY-87)** — movement and handling detection
-- **LDR (photoresistor)** — enclosure opening / seal breach detection
-- **OLED (SSD1306)** — live operational status (development UI)
-- **Serial logging** — event-driven diagnostics
-
-Sensor thresholds are **auto-calibrated** at boot and treated as a trust boundary in Phase 3.
+Traditional tamper-evident seals are reactive and "loud." **CoC-VDS is proactive and silent**. It models the transport process itself, enforcing who is allowed to access the asset, when they can do it, and under what conditions. If a rule is broken, the system doesn't scream; it silently records an immutable forensic record.
 
 ---
 
-## Custody Roles
-- **WHITE tag (Admin / Sealer / Receiver)**  
-  Seals the asset at origin and receives it at destination.  
-  *Not authorized to transport.*
+**How It Works**
+The system acts as a **Silent Witness** by correlating three data streams:
 
-- **BLUE tag (Handler / Courier)**  
-  Takes custody and may transport the sealed asset.  
-  *Not authorized to open the enclosure.*
+**Identity:** RFID-based role enforcement (Admin vs. Courier).
 
----
-## State Machine Overview
-![Chain-of-Custody State Machine](media/state_machine_phase3/state_machine_phase3.png)
+**Environment:** Light (LDR) and Motion (IMU) sensing.
 
-*Directed, fail-closed custody enforcement state machine.
-Black arrows represent authorized transitions.
-Red arrows represent violation triggers that permanently latch the system
-into `VIOLATION_LOCK`. Phase 4 hardening paths are explicitly marked.*
+**State:** A "fail-closed" state machine that only permits authorized transitions.
 
 ---
 
-## Project Phases
+**Role Breakdown**
+**WHITE Tag (Admin/Receiver):** Authorized to seal, unseal, and service the asset. Not authorized to transport.
 
-| Phase       | Focus                                                     |
-|-------------|-----------------------------------------------------------|
-| **Phase 1** | Hardware bring-up & baseline sensing                      |
-| **Phase 2** | Custody model, roles, and violation rules                 |
-| **Phase 3** | State machine enforcement & real-time violation detection |
-| **Phase 4** | Stealth UI, forensic logging, integrity hardening         |
-| **Phase 5** | Threat simulation & adversarial testing                   |
-| **Phase 6** | Final validation, documentation, and demo                 |
+**BLUE Tag (Courier/Handler):** Authorized to take custody and transport the sealed unit. **Never authorized to open it.**
 
 ---
 
-## Current Status — Phase 3 Complete
-Phase 3 implements a **finite state machine (FSM)** that enforces custody integrity *after sealing*.
+**Advanced Security Features (Phase 4)**
+Phase 4 transitioned the project from a simple monitor to a forensic-grade security device:
 
-It detects:
-- motion without custody
-- seal breaches via light exposure
-- failed or incomplete handovers
-- unauthorized state transitions
+**Stealth UI:** The OLED mimics a standard, boring "Shipping Label." It provides zero feedback to an attacker during a breach.
 
-Phase 3 deliberately focuses on **enforcement**, not attribution or stealth.
+**Cryptographic Chaining:** Every log entry is **HMAC-SHA256 signed** and chained to the previous record. This makes it mathematically impossible to delete or reorder history without detection.
 
-Detailed Phase 3 documentation:  
- [`docs/phase3_state_machine_enforcement.md.txt`](docs/phase3_state_machine_enforcement.md.txt)
+**Hardware-Bound Keys:** Keys are derived from the **Uno R4 Silicon Unique ID**, ensuring the firmware (and its logs) cannot be cloned to another device.
+
+**Offline Audit Portal:** A device-hosted WiFi SoftAP allows auditors to extract signed reports and CSV data without needing a cloud connection or external apps.
 
 ---
 
-## Scope & Threat Model (High Level)
-Phase 3 assumes:
-- a trusted sealing action
-- token-based RFID credentials
-- no protection prior to sealing
+**Live Demonstrations**
+1. **The "Sneaky Courier" (End-to-End Logic)**
+This is the primary operational demo. An Admin seals the unit, and a Courier takes custody. While "In Transit," the courier pries the lid to peek inside. The system provides **no feedback,** but silently logs a **High-Severity Violation**. The breach is only revealed when the Admin performs an audit.
 
-These assumptions are explicitly documented and hardened in Phase 4.
-
----
-
-## Roadmap (Phase 4 Preview)
-Phase 4 extends the system with:
-- non-revealing (stealth) UI behavior
-- append-only, tamper-evident custody logs
-- calibration hardening & sanity bounds
-- MFA and multi-party authorization
-- post-incident forensic reconstruction
+2. **The "Bit-Flip" (Cryptographic Integrity)**
+This demo proves the math works. Using a dedicated serial command, we manually flip a single bit in the EEPROM—simulating physical memory tampering. The Audit Report immediately flags the **exact record** where the HMAC check failed, marking the entire chain as **FAILED.**
 
 ---
 
-## Disclaimer
-This project is a **research and learning prototype** intended to explore custody enforcement, cyber-physical security, and forensic integrity concepts.  
-It is not a production security device.
+**Adversarial Simulation Suite**
+The repository includes specialized builds to test the system against sophisticated attacks:
+
+**Data Integrity:** Per-record HMAC-SHA256 validation.
+
+**History Continuity:**  Hash-chain link verification (detects record deletion/reordering).
+
+**Transfer Integrity:** (Roadmap) Browser-side SHA-256 verification of exported data.
+
+---
+
+**Repository Roadmap**
+![COC_VDS Final Build-Phase 4 Hardened](src/coc_vds_forensic-engine/) : The "Production" firmware including Stealth UI and Chaining.
+
+![Adversarial Build](demos/) : Adversarial builds for bit-flip and reordering/delete tests.
+
+![Technical Documentation](docs/) : Technical deep-dives into the state machine and crypto-implementation.
+
+---
+
+**Future Work**
+**Temporal Resilience:** Integrating a battery-backed RTC for absolute timestamping during power loss.
+
+**Multi-Party Authorization:** Requiring two distinct Admin tags to "unlock" high-privilege states.
+
+**Hardware Root of Trust:** Moving key storage to a dedicated Secure Element (e.g., ATECC608).
+
+---
+
+**Disclaimer**
+This is a research prototype exploring the intersection of embedded systems and forensic integrity. While it uses professional-grade cryptographic principles, it is intended for educational and demonstrative purposes, not for production security environments.
+
+**Security isn't about being loud. It's about being certain.**

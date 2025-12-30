@@ -1,9 +1,17 @@
 /*
- * CoC-VDS — Phase 3
- * Chain-of-Custody State Machine Enforcement
- * 
+ * Project: CoC-VDS (Chain-of-Custody Violation Detection System)
  * Board: Arduino Uno R4 WiFi
- * Status: Phase 3 complete (enforcement only)
+ * Version: 3.0 Prototype - State Machine & Custody Logic
+ * Author:  Chinyere Ihuoma Uwa (Kyma)
+ * Date:    December 2025
+ * 
+ * * Description:
+ * Milestone build focusing on the "Fail-Closed" State Machine. 
+ * This version established the Custody Roles (Admin vs. Courier) and 
+ * the logic for transition-based violation detection before the 
+ * implementation of cryptographic hash-chaining in Phase 4.
+ *
+ * 
  * Notes:
  *  - No stealth UI
  *  - No persistent logging
@@ -33,8 +41,8 @@ MFRC522 rfid(RFID_SS, RFID_RST);
 MPU6050 imu;
 
 
-const char* UID_ADMIN   = "1d5ed105";   // White demo card
-const char* UID_HANDLER = "d7410902";    // Blue demo tag
+static const char UID_ADMIN[] = "AAAAAAAA"; // Replace with your own admin / White card UID
+static const char UID_HANDLER[] = "BBBBBBBB"; // Replace with your own handler / Blue tag UID
 
 
 int  LIGHT_THRESHOLD  = 120;     

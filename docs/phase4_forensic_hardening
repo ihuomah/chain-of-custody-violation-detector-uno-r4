@@ -1,0 +1,76 @@
+**Phase 4: Forensic Logging, Stealth UI & Integrity Hardening**
+
+Phase 4 elevates the CoC-VDS from a real-time monitor into a **forensically credible witness.** While Phase 3 focused on preventing unauthorized actions, Phase 4 focuses on the harder problem: **proving a violation occurred** even when the adversary believes they left no trace. This phase introduces stealth operations, immutable append-only logging, and cryptographic chain-of-custody verification.
+
+**The "Silent Witness" Model**
+In a real-world breach, the attacker is often an insider (e.g., a courier or handler). If a security system beeps or flashes, the attacker can adapt, hide their tracks, or simply destroy the device.
+
+**CoC-VDS Phase 4 adopts a stealth approach:**
+
+**Silent Logging:** Violations trigger no LEDs, no buzzers, and no screen changes.
+
+**Operational Camouflage:** The OLED mimics a generic logistics "Shipping Label" with a progress bar and neutral status updates (e.g., "IN TRANSIT").
+
+**Latching Violations:** Once a breach is detected, the *journeyCompromised* flag is is persisted in non-volatile memory and survives reboots and power loss until formally audited and cleared by the Admin.
+
+**Cryptographic Integrity & Evidence Binding**
+To ensure the logs are defensible in an audit, Phase 4 implemented a layered cryptographic defense:
+
+1. **Record Integrity (HMAC-SHA256)**
+Every log record is signed using HMAC-SHA256 with a device-unique key.  
+Any bit-level modification—such as altering a violation code or timestamp—causes immediate verification failure during audit.
+
+This prevents **silent modification of forensic evidence.**
+
+2. **Chain Continuity (Hash Chaining)**
+Each record contains the HMAC signature of the previous record. This creates a mathematical "anchor" between events.
+
+**Deletion Protection:** If a record is deleted, the chain breaks.
+
+**Reorder Protection:** If records are swapped, the hashes no longer align. The system doesn't just say "something is wrong"; it identifies the **exact index** where the timeline was tampered with.
+
+3. **Hardware Root of Trust**
+The master key is not hardcoded. It is derived from the **Arduino Uno R4 Silicon Unique ID.** This 
+cryptographically binds all evidence to the physical device itself, preventing clone-and-replace attacks where
+clean logs are generated on a different board.
+
+**Forensic Memory & Recovery**
+On boot, the system reconstructs state directly from the forensic ledger:
+
+It scans the entire EEPROM ledger.
+
+Each record’s integrity is re-verified.
+
+It reconstructs the current state (e.g., SEALED vs. IN_CUSTODY) based on the last valid entry. This ensures the system is resilient against **power-cycle attacks** where an adversary attempts to reset volatile state to hide a violation.
+
+
+**Offline Audit Workflow**
+Evidence extraction must function in disconnected or restricted environments.
+
+**Soft AP Portal:** An Admin triple-tap enables a device-hosted WiFi access point.
+
+**Signed Exports:** Auditors connect via smartphone or laptop to view a **Signed Audit Report** or download a **CSV Evidence Log.**
+
+**Audit Trail:** The act of exporting or clearing logs is itself a logged event, ensuring a complete history of who accessed the data.
+
+No cloud services or external infrastructure are required.
+
+**Adversarial Testing and Validation**
+Phase 4 was validated against common custody attack classes, using dedicated demo builds and test harnesses:
+
+**Bit-Flip Tampering:** Manual modification of EEPROM data.
+
+**History Deletion/Reordering:** Attempted removal or reshuffling of log entries.
+
+**Credential Misuse:** Using unauthorized RFID tags.
+
+**Reset based Evasion:** Power loss during active custody.
+
+Selected scenarios are demonstrated directly; others are documented and reproducible via provided 
+![demos](demos/) builds.
+
+**Summary: Certainty Over Alerts**
+The design philosophy of Phase 4 is that **Security is not about being loud; it is about being certain.**
+By prioritizing evidence integrity over immediate prevention, CoC-VDS provides a "Forensic Ledger" that can
+hold up under scrutiny, making it a viable model for high-stakes logistics and regulated chain-of-custody
+environments.
