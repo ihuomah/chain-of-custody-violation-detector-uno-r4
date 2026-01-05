@@ -1,5 +1,8 @@
 # Chain-of-Custody Violation Detection System (CoC-VDS)
 ---
+## Demo Video
+**Watch the 5-minute Demonstration:** [Chain-of-Custody Violation Detecction System Demo](https://youtube.com/watch?v=K0F_QOCjArw)
+---
 > Security isn’t about being loud. It’s about being certain.
 ---
 
